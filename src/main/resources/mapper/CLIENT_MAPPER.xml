@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="CLIENT">
+	<select id="getUaClient" resultType="org.jasig.cas.entity.UaClient" parameterType="string">
+		SELECT 
+	        id AS id , 
+	        client_code AS clientCode , 
+	        client_name AS clientName , 
+	        client_url AS clientUrl , 
+	        client_status AS clientStatus , 
+	        client_type AS clientType , 
+	        client_desc AS clientDesc , 
+	        client_language AS clientLanguage , 
+	        version AS version , 
+	        note AS note , 
+	        crt_date AS crtDate , 
+	        upd_date AS updDate , 
+	        ext1 AS ext1 , 
+	        ext2 AS ext2 , 
+	        ext3 AS ext3 , 
+	        ext4 AS ext4 , 
+	        ext5 AS ext5  
+	    FROM 
+	        ua_client
+        WHERE 
+        	client_code=#{value}
+	</select>
+	
+	
+</mapper>

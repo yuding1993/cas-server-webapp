@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    - Application context definition for JPetStore's data access layer. -
+    Accessed by business layer objects defined in "applicationContext.xml"
+    - (see web.xml's "contextConfigLocation"). - - This version of the
+    data access layer works on a combined database, - using a local
+    DataSource with DataSourceTransactionManager. It does not - need any
+    JTA support in the container: It will run as-is in plain Tomcat.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+				http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <!-- 加载的mapper文件 -->
+        <property name="mapperLocations">
+            <array>
+                <value>classpath:mapper/*.xml</value>
+            </array>
+        </property>
+    </bean>
+
+    <bean id="gVPersonDAO" class="org.jasig.cas.dao.impl.GVPersonDAOImpl">
+        <property name="sqlSessionFactory" ref="sqlSessionFactory" />
+    </bean>
+
+    <bean id="uaClientDAO" class="org.jasig.cas.dao.impl.UaClientDAOImpl">
+        <property name="sqlSessionFactory" ref="sqlSessionFactory" />
+    </bean>
+
+
+</beans>

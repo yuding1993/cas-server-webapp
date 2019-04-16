@@ -15,12 +15,25 @@ public class UsernamePasswordCaptchaCredential extends RememberMeUsernamePasswor
     @Size(min = 1, message = "required.captcha")
     private String captcha;
 
+    /**
+     * 登录类型 0、登录名和密码登录; 1、电子口岸介质登录
+     */
+    private String loginType;
+
     public String getCaptcha() {
         return captcha;
     }
 
     public void setCaptcha(String captcha) {
         this.captcha = captcha;
+    }
+
+    public String getLoginType() {
+        return loginType;
+    }
+
+    public void setLoginType(String loginType) {
+        this.loginType = loginType;
     }
 
     @Override
@@ -51,7 +64,7 @@ public class UsernamePasswordCaptchaCredential extends RememberMeUsernamePasswor
     @Override
     public String toString() {
         return "UsernamePasswordCaptchaCredentials [captcha=" + captcha + ", isRememberMe()=" + isRememberMe()
-                + ", getPassword()=" + getPassword() + ", getUsername()=" + getUsername() + ", toString()="
-                + super.toString() + ", getClass()=" + getClass() + "]";
+                + ", getPassword()=" + getPassword() + ", getUsername()=" + getUsername() + ", loginType()=" + loginType +
+                ", toString()=" + super.toString() + ", getClass()=" + getClass() + "]";
     }
 }

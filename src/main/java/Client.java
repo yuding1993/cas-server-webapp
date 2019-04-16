@@ -145,11 +145,12 @@ public class Client {
     }
 
     public static void main(final String[] args) throws Exception {
-        final String server = "http://localhost:8080/cas/v1/tickets";
-        final String username = "adminoue";
-        final String password = "4009696109";
-        final String service = "http://localhost:8080";
-        final String proxyValidate = "http://localhost:8080/cas/proxyValidate";
+        final String server = "http://localhost:8081/v1/tickets";
+        final String username = "jj";
+        final String password = "123456";
+        final String service = "http://localhost:8081";
+        final String casClientId = "SW_0004";
+        final String proxyValidate = "http://localhost:8081/proxyValidate";
         ticketValidate(proxyValidate, getTicket(server, username, password, service), service);
     }
 

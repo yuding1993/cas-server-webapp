@@ -115,7 +115,7 @@
     </bean>
 
     <bean id="loginHandlerAdapter" class="org.jasig.cas.web.flow.SelectiveFlowHandlerAdapter"
-          p:supportedFlowId="login" p:flowExecutor-ref="loginFlowExecutor" p:flowUrlHandler-ref="loginFlowUrlHandler"/>
+          p:supportedFlowId="ulogin" p:flowExecutor-ref="loginFlowExecutor" p:flowUrlHandler-ref="loginFlowUrlHandler"/>
 
     <bean id="loginFlowUrlHandler" class="org.jasig.cas.web.flow.CasDefaultFlowUrlHandler"/>
 
@@ -130,7 +130,7 @@
     </webflow:flow-executor>
 
     <webflow:flow-registry id="loginFlowRegistry" flow-builder-services="builder">
-        <webflow:flow-location path="/WEB-INF/login-webflow.xml" id="login"/>
+        <webflow:flow-location path="/WEB-INF/login-webflow.xml" id="ulogin"/>
     </webflow:flow-registry>
 
     <!-- logout webflow configuration -->
@@ -167,7 +167,9 @@
 
     <bean id="logoutConversionService" class="org.jasig.cas.web.flow.LogoutConversionService"/>
 
-    <bean id="terminateWebSessionListener" class="org.jasig.cas.web.flow.TerminateWebSessionListener"/>
+    <bean id="terminateWebSessionListener" class="org.jasig.cas.web.flow.TerminateWebSessionListener"
+        p:timeToDieInSeconds="100"
+    />
 
     <bean id="expressionParser" class="org.springframework.webflow.expression.spel.WebFlowSpringELExpressionParser"
           c:conversionService-ref="logoutConversionService">
@@ -185,10 +187,11 @@
     </bean>
 
     <!--  CAS 2 Protocol service/proxy validation -->
-    <bean id="abstractValidateController" class="org.jasig.cas.web.ServiceValidateController" abstract="true"
+    <bean id="abstractValidateController" class="org.jasig.cas.web.GVServiceValidateController" abstract="true"
           p:centralAuthenticationService-ref="centralAuthenticationService"
           p:proxyHandler-ref="proxy20Handler"
-          p:argumentExtractor-ref="casArgumentExtractor"/>
+          p:argumentExtractor-ref="casArgumentExtractor"
+          p:uaClientDAO-ref="uaClientDAO"/>
 
     <bean id="proxyValidateController" parent="abstractValidateController"/>
 

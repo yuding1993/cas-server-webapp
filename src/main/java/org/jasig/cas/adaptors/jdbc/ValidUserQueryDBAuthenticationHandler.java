@@ -5,15 +5,11 @@ import org.apache.shiro.crypto.hash.ConfigurableHashService;
 import org.apache.shiro.crypto.hash.DefaultHashService;
 import org.apache.shiro.crypto.hash.HashRequest;
 import org.apache.shiro.util.ByteSource;
-import org.jasig.cas.authentication.AccountDisabledException;
-import org.jasig.cas.authentication.HandlerResult;
-import org.jasig.cas.authentication.PreventedException;
-import org.jasig.cas.authentication.UsernamePasswordCredential;
+import org.jasig.cas.authentication.*;
 import org.jasig.cas.authentication.principal.SimplePrincipal;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 
-import javax.security.auth.login.AccountLockedException;
 import javax.security.auth.login.AccountNotFoundException;
 import javax.security.auth.login.FailedLoginException;
 import javax.sql.DataSource;
@@ -32,19 +28,19 @@ public class ValidUserQueryDBAuthenticationHandler extends AbstractJdbcUsernameP
      * The Algorithm name.
      */
     @NotNull
-    protected final String algorithmName;
+    protected String algorithmName;
 
     /**
      * The Sql statement to execute.
      */
     @NotNull
-    protected final String sql;
+    protected String sql;
 
     /**
      * The Password field name.
      */
     @NotNull
-    protected String passwordFieldName = DEFAULT_PASSWORD_FIELD;
+    protected String passwordFieldName = "login_password";
 
     /**
      * The Salt field name.
@@ -62,7 +58,7 @@ public class ValidUserQueryDBAuthenticationHandler extends AbstractJdbcUsernameP
      * The disabled field name.
      */
     @NotNull
-    protected String disabledFieldName = DEFAULT_DISABLED_FIELD;
+    protected String disabledFieldName = "account_status";
 
     /**
      * The locked field name.
@@ -84,17 +80,17 @@ public class ValidUserQueryDBAuthenticationHandler extends AbstractJdbcUsernameP
     /**
      * Instantiates a new Query and encode database authentication handler.
      *
-     * @param datasource    The database datasource
+     * @param dataSource    The database datasource
      * @param sql           the sql query to execute which must include a parameter placeholder
      *                      for the user id. (i.e. <code>SELECT * FROM table WHERE username = ?</code>
      * @param algorithmName the algorithm name (i.e. <code>MessageDigestAlgorithms.SHA_512</code>)
      */
 
-    public ValidUserQueryDBAuthenticationHandler(final DataSource datasource,
+    public ValidUserQueryDBAuthenticationHandler(final DataSource dataSource,
                                                  final String sql,
                                                  final String algorithmName) {
         super();
-        setDataSource(datasource);
+        setDataSource(dataSource);
         this.sql = sql;
         this.algorithmName = algorithmName;
     }
@@ -110,13 +106,16 @@ public class ValidUserQueryDBAuthenticationHandler extends AbstractJdbcUsernameP
             if (Boolean.TRUE.equals(values.get(this.disabledFieldName))) {
                 throw new AccountDisabledException(username + "  has been disabled.");
             }
-            if (Boolean.TRUE.equals(values.get(this.lockedFieldName))) {
-                throw new AccountLockedException(username + "  has been locked.");
-            }
+//            if (Boolean.TRUE.equals(values.get(this.lockedFieldName))) {
+//                throw new AccountLockedException(username + "  has been locked.");
+//            }
 
-            final String digestedPassword = digestEncodedPassword(transformedCredential.getPassword(), values);
-            if (!values.get(this.passwordFieldName).equals(digestedPassword)) {
-                throw new FailedLoginException("Password does not match value on record.");
+            // 不是IC卡代理登录需要校验密码
+            if (!"1".equals(((UsernamePasswordCaptchaCredential) transformedCredential).getLoginType())) {
+                final String digestedPassword = digestEncodedPassword(transformedCredential.getPassword(), values);
+                if (!values.get(this.passwordFieldName).equals(digestedPassword)) {
+                    throw new FailedLoginException("Password does not match value on record.");
+                }
             }
             return createHandlerResult(transformedCredential,
                     new SimplePrincipal(username), null);
@@ -155,13 +154,7 @@ public class ValidUserQueryDBAuthenticationHandler extends AbstractJdbcUsernameP
         }
 
         hashService.setHashIterations(numOfIterations.intValue());
-        if (!values.containsKey(this.saltFieldName)) {
-            throw new RuntimeException("Specified field name for salt does not exist in the results");
-        }
-
-        final String dynaSalt = values.get(this.saltFieldName) == null ? "" : values.get(this.saltFieldName).toString();
         final HashRequest request = new HashRequest.Builder()
-                .setSalt(dynaSalt)
                 .setSource(encodedPassword)
                 .build();
         return hashService.computeHash(request).toHex();
@@ -255,5 +248,21 @@ public class ValidUserQueryDBAuthenticationHandler extends AbstractJdbcUsernameP
      */
     public final void setNumberOfIterations(final long numberOfIterations) {
         this.numberOfIterations = numberOfIterations;
+    }
+
+    public String getSql() {
+        return sql;
+    }
+
+    public void setSql(String sql) {
+        this.sql = sql;
+    }
+
+    public String getAlgorithmName() {
+        return algorithmName;
+    }
+
+    public void setAlgorithmName(String algorithmName) {
+        this.algorithmName = algorithmName;
     }
 }

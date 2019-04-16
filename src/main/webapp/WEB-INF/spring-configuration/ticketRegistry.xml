@@ -29,26 +29,25 @@
     </description>
 
     <!-- Ticket Registry -->
-    <!--<bean id="ticketRegistry" class="org.jasig.cas.ticket.registry.DefaultTicketRegistry" />-->
+    <bean id="ticketRegistry" class="org.jasig.cas.ticket.registry.DefaultTicketRegistry" />
 
-    <bean id="ticketRegistry" class="org.jasig.cas.ticket.registry.RedisTicketRegistry">
-        <constructor-arg index="0" ref="redisTemplate"/>
-        <constructor-arg index="1" value="28800"/>
-        <constructor-arg index="2" value="7200"/>
-    </bean>
+    <!-- redis存储方案 -->
+    <!--<bean id="ticketRegistry" class="org.jasig.cas.ticket.registry.RedisTicketRegistry">-->
+        <!--<constructor-arg index="0" ref="redisTemplate"/>-->
+        <!--<constructor-arg index="1" value="28800"/>-->
+        <!--<constructor-arg index="2" value="7200"/>-->
+    <!--</bean>-->
 
-    <bean id="jedisConnFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
-          p:hostName="${redis.hostname}" p:port="${redis.port}" p:database="${redis.database}"
-          p:usePool="${redis.usePool}"/>
+    <!--<bean id="jedisConnFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"-->
+          <!--p:hostName="${redis.hostname}" p:port="${redis.port}" p:database="${redis.database}"-->
+          <!--p:usePool="${redis.usePool}"/>-->
 
-    <bean id="redisTemplate" class="org.jasig.cas.ticket.registry.TicketRedisTemplate"
-          p:connectionFactory-ref="jedisConnFactory">
-    </bean>
+    <!--<bean id="redisTemplate" class="org.jasig.cas.ticket.registry.TicketRedisTemplate"-->
+          <!--p:connectionFactory-ref="jedisConnFactory">-->
+    <!--</bean>-->
 
     <!--Quartz -->
     <!-- TICKET REGISTRY CLEANER -->
-
-    <!--
     <bean id="ticketRegistryCleaner" class="org.jasig.cas.ticket.registry.support.DefaultTicketRegistryCleaner"
         p:ticketRegistry-ref="ticketRegistry"
         p:logoutManager-ref="logoutManager" />
@@ -61,6 +60,5 @@
         p:jobDetail-ref="jobDetailTicketRegistryCleaner"
         p:startDelay="20000"
         p:repeatInterval="5000000" />
-    -->
 
 </beans>

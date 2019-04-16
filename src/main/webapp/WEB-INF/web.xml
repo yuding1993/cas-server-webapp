@@ -35,6 +35,27 @@
         </param-value>
     </context-param>
 
+    <context-param>
+        <param-name>proxyEport</param-name>
+        <param-value>http://proxyeport.wh-eport.cn</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>eportCas</param-name>
+        <param-value>http://cas.chinaport.gov.cn/cas/login</param-value>
+    </context-param>
+    <!-- ??URL -->
+    <context-param>
+        <param-name>uaUserRegisterUrl</param-name>
+        <param-value>https://uams.wh-eport.cn/user/initRegister</param-value>
+    </context-param>
+
+    <!-- ????URL -->
+    <context-param>
+        <param-name>uaUserResetPasswordUrl</param-name>
+        <param-value>https://uams.wh-eport.cn/na/user/resetPassword</param-value>
+    </context-param>
+
     <filter>
         <filter-name>CAS Client Info Logging Filter</filter-name>
         <filter-class>com.github.inspektr.common.web.ClientInfoThreadLocalFilter</filter-class>
@@ -114,6 +135,11 @@
     <servlet-mapping>
         <servlet-name>cas</servlet-name>
         <url-pattern>/login</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>cas</servlet-name>
+        <url-pattern>/ulogin</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

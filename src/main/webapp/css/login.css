@@ -69,11 +69,11 @@ input {
 }
 
 .index_login .outer_box {
-    width: 450px;
+    width: 500px;
     max-height: 600px;
     overflow: hidden;
     position: absolute;
-    top: 50%;
+    top: 40%;
     margin-top: -320px;
     left: 50%;
     margin-left: -225px;
@@ -87,10 +87,12 @@ input {
 }
 
 .index_login h1 {
-    width: 440px;
-    height: 80px;
-    overflow: hidden;
-    margin: 0 auto;
+    height: 60px;
+    font-size: 38px;
+}
+
+.index_login h2 {
+    font-size: 25px;
 }
 
 .login_box {
@@ -235,6 +237,7 @@ input {
     background-color: #37a3e3;
     color: white;
     border: 1px solid #37a3e3;
+    cursor: pointer;
     -moz-border-radius: 30px; /* Gecko browsers */
     -webkit-border-radius: 30px; /* Webkit browsers */
     border-radius: 30px; /* W3C syntax */
@@ -244,3 +247,10 @@ input {
     background-color: #3eb7ff;
     border: 1px solid #3eb7ff;
 }
+
+
+.footer_wh{ height: 95px; position: fixed; bottom: 0;width: 100%;}
+.footer_filing{ line-height:29px; color:#37a3e3; text-align:center;}
+.footer_filing img{ position:relative; margin-right:8px; top:28px; left: 50%; margin-left: -220px;}
+.footer_filing span,.footer_unit span{ padding:0 14px;}
+.footer_unit{ text-align:center; color:#37a3e3; margin-top:8px;}

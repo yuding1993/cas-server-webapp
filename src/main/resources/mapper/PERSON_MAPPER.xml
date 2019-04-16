@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PERSON">
+	<select id="getUPersonByUsername" resultType="org.jasig.cas.entity.UaUser" parameterType="string">
+		SELECT 
+			uu.id AS id , 
+	        uu.org_id AS orgId , 
+	        uu.login_name AS loginName , 
+	        uu.login_password AS loginPassword , 
+	        uu.op_name AS opName , 
+	        uu.login_type AS loginType , 
+	        uu.account_status AS accountStatus , 
+	        uu.account_type AS accountType , 
+	        uu.mobile AS mobile , 
+	        uu.mobile_stucd AS mobileStucd , 
+	        uu.email AS email , 
+	        uu.email_stucd AS emailStucd , 
+	        uu.iddoc_typecd AS iddocTypecd , 
+	        uu.iddoc_type AS iddocType , 
+	        uu.ic_number AS icNumber ,
+	        uu.cert_number AS certNumber ,
+	        uu.inspection_account AS inspectionAccount ,
+	        uu.inspection_password AS inspectionPassword ,
+	        uo.social_credit_code AS socialCreditCode , 
+	        uo.org_code AS orgCode , 
+	        uo.etps_name AS etpsName , 
+	        uo.etps_address AS etpsAddress , 
+	        uo.etps_vrffy_stucd AS etpsVrffyStucd , 
+	        uo.correp_name AS correpName , 
+	        uo.iddoc_typecd AS correpIddocTypecd , 
+	        uo.iddoc_type AS correpIddocType ,
+	        uo.cus_reg_no AS cusRegNo , 
+	        uo.cards AS cards , 
+	        uu.ext1 AS ext1 , 
+	        uo.ext1 AS ext2 , 
+	        uu.ext3 AS ext3 , 
+	        uo.ext4 AS ext4 , 
+	        uo.ext5 AS ext5 ,
+	        uo.company_number AS companyNumber 
+	    FROM 
+	        ua_user uu ,ua_organization uo
+        WHERE 
+        	uu.org_id=uo.id
+        	and uu.login_name=#{value}
+	</select>
+	
+	<select id="getAPersonByUsername" parameterType="String" resultType="org.jasig.cas.entity.SysOperator">
+		SELECT
+			so.id AS id,
+			so.crt_id AS crtId,
+			so.username AS username,
+			so. PASSWORD AS PASSWORD,
+			so.alias AS alias,
+			so.operator_no AS operatorNo,
+			so.operator_type AS operatorType,
+			so.email AS email,
+			so.idnumber AS idnumber,
+			so.mobile AS mobile,
+			so.sex AS sex,
+			so.birthday AS birthday,
+			so.office_tel AS officeTel,
+			so.home_tel AS homeTel,
+			so.is_valid AS isValid,
+			so.question AS question,
+			so.answer AS answer,
+			so.reg_time AS regTime,
+			so.last_update AS lastUpdate,
+			so.last_time AS lastTime,
+			so.last_ip AS lastIp,
+			so.visit_count AS visitCount,
+			so.qq AS qq,
+			so.welcome AS welcome,
+			so.note AS note,
+			so.ext1 AS ext1,
+			so.ext2 AS ext2,
+			so.ext3 AS ext3,
+			so.ext4 AS ext4,
+			so.ext5 AS ext5,
+			sgo.group_id AS groupId,
+			(
+				SELECT
+					sg.group_name
+				FROM
+					sys_group sg
+				WHERE
+					sg.id = sgo.group_id
+			)AS groupName
+		FROM
+			sys_operator so
+		LEFT JOIN sys_group_operator sgo ON so.id = sgo.oper_id
+		WHERE
+			so.username = #{value}
+	</select>
+	
+	<select id="getURolesIdByUsername" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT
+			ur.id
+		FROM
+			ua_roles ur left join ua_user_role uur on uur.role_id = ur.id,
+			ua_user uu
+		WHERE
+			uu.login_name=#{value}
+			and uu.id = uur.user_id
+	</select>
+	
+	<select id="getUpersonDistinctResourceId" parameterType="java.util.List" resultType="java.lang.String">
+		SELECT
+			DISTINCT ura.resource_id
+		FROM
+			ua_role_authority ura
+		WHERE
+			ura.role_id IN
+			<foreach collection="list" item="roleId" index="index" open="(" close=")" separator=",">
+				#{roleId}
+			</foreach>
+	</select>
+	
+	<select id="getUPersonResours" parameterType="java.util.List" resultType="org.jasig.cas.entity.UaResourceModel">
+		SELECT
+			ur.id as id,
+			ur.pid as pid,
+			ur.node_level as nodeLevel,
+			ur.resource_name as resourceName,
+			ur.resource_order as resourceOrder,
+			ur.resource_url as resourceUrl,
+			ur.resource_icon as resourceIcon,
+			ur.view_type as viewType,
+			ur.is_valid as isValid,
+			ur.ext1 as ext1,
+			ur.ext2 as ext2,
+			ur.ext3 as ext3,
+			ur.ext4 as ext4,
+			ur.ext5 as ext5,
+			uc.client_code as clientCode
+		FROM
+			ua_resource ur left join ua_client uc on uc.id = ur.client_id
+		WHERE
+			ur.id IN
+			<foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+				#{id}
+			</foreach>
+		ORDER BY
+			ur.resource_order
+	</select>
+	
+	<select id="getUpersonRolesByUsername" parameterType="java.lang.String" resultType="java.util.Map">
+		SELECT
+			ur.role_name as roleName,
+			ur.role_desc as roleDesc
+		FROM
+			ua_roles ur left join ua_user_role uur on uur.role_id = ur.id,
+			ua_user uu
+		WHERE
+			uu.login_name=#{value}
+			and uu.id = uur.user_id
+	</select>
+	
+</mapper>
