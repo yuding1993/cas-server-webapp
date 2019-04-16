@@ -166,23 +166,10 @@
 
     <import resource="applicationContext-mybatis.xml"/>
 
-    <!-- 密码加密策略 -->
-    <bean id="MD5PasswordEncoder" class="org.jasig.cas.authentication.handler.DefaultPasswordEncoder"
-          c:encodingAlgorithm="MD5" p:characterEncoding="UTF-8"/>
-
-    <!-- 自定义基于数据库认证策略 -->
-    <!--<bean id="primaryAuthenticationHandler" class="org.jasig.cas.adaptors.jdbc.QueryDatabaseAuthenticationHandler">-->
-        <!--<property name="dataSource" ref="dataSource"/>-->
-        <!--<property name="sql" value="${auth.sql}"/>-->
-        <!--<property name="passwordEncoder" ref="MD5PasswordEncoder"/>-->
-    <!--</bean>-->
-
     <bean id="primaryAuthenticationHandler" class="org.jasig.cas.adaptors.jdbc.ValidUserQueryDBAuthenticationHandler">
-        <constructor-arg name="dataSource" ref="dataSource"/>
-        <constructor-arg name="sql" value="${auth.sql}"/>
+        <constructor-arg name="userAuthenticationDao" ref="userAuthenticationDao"/>
         <constructor-arg name="algorithmName" value="MD5"/>
     </bean>
-
 
 
     <!-- Required for proxy ticket mechanism -->
@@ -198,7 +185,7 @@
         <property name="attributeRepository" ref="attributeRepository"/>
     </bean>
 
-    <!--自定义认证-->
+    <!-- 扩展用户自定义属性 -->
     <bean id="attributeRepository" class="org.jasig.services.persondir.support.MultipleAttributeUserDao">
         <property name="gVPersonDAO" ref="gVPersonDAO"/>
     </bean>

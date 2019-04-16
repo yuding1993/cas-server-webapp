@@ -6,41 +6,29 @@ import org.apache.shiro.crypto.hash.DefaultHashService;
 import org.apache.shiro.crypto.hash.HashRequest;
 import org.apache.shiro.util.ByteSource;
 import org.jasig.cas.authentication.*;
+import org.jasig.cas.authentication.handler.support.AbstractUsernamePasswordAuthenticationHandler;
 import org.jasig.cas.authentication.principal.SimplePrincipal;
+import org.jasig.cas.dao.UserAuthenticationDao;
+import org.jasig.cas.entity.UaUser;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 
 import javax.security.auth.login.AccountNotFoundException;
 import javax.security.auth.login.FailedLoginException;
-import javax.sql.DataSource;
 import javax.validation.constraints.NotNull;
 import java.security.GeneralSecurityException;
 import java.util.Map;
 
-public class ValidUserQueryDBAuthenticationHandler extends AbstractJdbcUsernamePasswordAuthenticationHandler {
+public class ValidUserQueryDBAuthenticationHandler extends AbstractUsernamePasswordAuthenticationHandler {
 
-    private static final String DEFAULT_PASSWORD_FIELD = "password";
     private static final String DEFAULT_SALT_FIELD = "salt";
     private static final String DEFAULT_NUM_ITERATIONS_FIELD = "numIterations";
-    private static final String DEFAULT_LOCKED_FIELD = "locked";
-    private static final String DEFAULT_DISABLED_FIELD = "disabled";
+
     /**
      * The Algorithm name.
      */
     @NotNull
     protected String algorithmName;
-
-    /**
-     * The Sql statement to execute.
-     */
-    @NotNull
-    protected String sql;
-
-    /**
-     * The Password field name.
-     */
-    @NotNull
-    protected String passwordFieldName = "login_password";
 
     /**
      * The Salt field name.
@@ -55,18 +43,6 @@ public class ValidUserQueryDBAuthenticationHandler extends AbstractJdbcUsernameP
     protected String numberOfIterationsFieldName = DEFAULT_NUM_ITERATIONS_FIELD;
 
     /**
-     * The disabled field name.
-     */
-    @NotNull
-    protected String disabledFieldName = "account_status";
-
-    /**
-     * The locked field name.
-     */
-    @NotNull
-    protected String lockedFieldName = DEFAULT_LOCKED_FIELD;
-
-    /**
      * The number of iterations. Defaults to 0.
      */
     protected long numberOfIterations;
@@ -76,22 +52,24 @@ public class ValidUserQueryDBAuthenticationHandler extends AbstractJdbcUsernameP
      */
     protected String staticSalt;
 
+    /**
+     * 用户验证dao
+     */
+    protected UserAuthenticationDao userAuthenticationDao;
+
 
     /**
      * Instantiates a new Query and encode database authentication handler.
      *
      * @param dataSource    The database datasource
-     * @param sql           the sql query to execute which must include a parameter placeholder
      *                      for the user id. (i.e. <code>SELECT * FROM table WHERE username = ?</code>
      * @param algorithmName the algorithm name (i.e. <code>MessageDigestAlgorithms.SHA_512</code>)
      */
 
-    public ValidUserQueryDBAuthenticationHandler(final DataSource dataSource,
-                                                 final String sql,
+    public ValidUserQueryDBAuthenticationHandler(final UserAuthenticationDao userAuthenticationDao,
                                                  final String algorithmName) {
         super();
-        setDataSource(dataSource);
-        this.sql = sql;
+        this.userAuthenticationDao = userAuthenticationDao;
         this.algorithmName = algorithmName;
     }
 
@@ -101,19 +79,21 @@ public class ValidUserQueryDBAuthenticationHandler extends AbstractJdbcUsernameP
         final String username = getPrincipalNameTransformer().transform(transformedCredential.getUsername());
 
         try {
-            final Map<String, Object> values = getJdbcTemplate().queryForMap(this.sql, username);
+            final UaUser user = userAuthenticationDao.getPerson(username);
 
-            if (Boolean.TRUE.equals(values.get(this.disabledFieldName))) {
-                throw new AccountDisabledException(username + "  has been disabled.");
-            }
-//            if (Boolean.TRUE.equals(values.get(this.lockedFieldName))) {
+            // 如果账号已被停用
+//            if ("1".equals(user.getAccountStatus())) {
+//                throw new AccountDisabledException(username + "  has been disabled.");
+//            }
+            // 如果账号已被锁
+//            if (Boolean.TRUE.equals(user.getAccountStatus())) {
 //                throw new AccountLockedException(username + "  has been locked.");
 //            }
 
             // 不是IC卡代理登录需要校验密码
             if (!"1".equals(((UsernamePasswordCaptchaCredential) transformedCredential).getLoginType())) {
-                final String digestedPassword = digestEncodedPassword(transformedCredential.getPassword(), values);
-                if (!values.get(this.passwordFieldName).equals(digestedPassword)) {
+                final String digestedPassword = digestEncodedPassword(transformedCredential.getPassword(), user);
+                if (!user.getLoginPassword().equals(digestedPassword)) {
                     throw new FailedLoginException("Password does not match value on record.");
                 }
             }
@@ -136,25 +116,22 @@ public class ValidUserQueryDBAuthenticationHandler extends AbstractJdbcUsernameP
      * Digest encoded password.
      *
      * @param encodedPassword the encoded password
-     * @param values          the values retrieved from database
+     * @param user          the user retrieved from database
      * @return the digested password
      */
-    protected String digestEncodedPassword(final String encodedPassword, final Map<String, Object> values) {
+    protected String digestEncodedPassword(final String encodedPassword, final UaUser user) {
         final ConfigurableHashService hashService = new DefaultHashService();
 
         if (StringUtils.isNotBlank(this.staticSalt)) {
             hashService.setPrivateSalt(ByteSource.Util.bytes(this.staticSalt));
         }
         hashService.setHashAlgorithmName(this.algorithmName);
-
+        // 暂时没有hash迭代器数量可配置
         Long numOfIterations = this.numberOfIterations;
-        if (values.containsKey(this.numberOfIterationsFieldName)) {
-            final String longAsStr = values.get(this.numberOfIterationsFieldName).toString();
-            numOfIterations = Long.valueOf(longAsStr);
-        }
-
         hashService.setHashIterations(numOfIterations.intValue());
         final HashRequest request = new HashRequest.Builder()
+                // 暂时不加盐
+//                .setSalt(saltFieldName)
                 .setSource(encodedPassword)
                 .build();
         return hashService.computeHash(request).toHex();
@@ -197,15 +174,6 @@ public class ValidUserQueryDBAuthenticationHandler extends AbstractJdbcUsernameP
     }
 
     /**
-     * Sets password field name. Default is {@link #DEFAULT_PASSWORD_FIELD}.
-     *
-     * @param passwordFieldName the password field name
-     */
-    public final void setPasswordFieldName(final String passwordFieldName) {
-        this.passwordFieldName = passwordFieldName;
-    }
-
-    /**
      * Sets salt field name. Default is {@link #DEFAULT_SALT_FIELD}.
      *
      * @param saltFieldName the password field name
@@ -224,24 +192,6 @@ public class ValidUserQueryDBAuthenticationHandler extends AbstractJdbcUsernameP
     }
 
     /**
-     * Sets disabled field name. Default is {@link #DEFAULT_DISABLED_FIELD}.
-     *
-     * @param disabledFieldName the disabled field name
-     */
-    public final void setDisabledFieldName(final String disabledFieldName) {
-        this.disabledFieldName = disabledFieldName;
-    }
-
-    /**
-     * Sets locked field name. Default is {@link #DEFAULT_LOCKED_FIELD}.
-     *
-     * @param lockedFieldName the locked field name
-     */
-    public final void setLockedFieldName(final String lockedFieldName) {
-        this.lockedFieldName = lockedFieldName;
-    }
-
-    /**
      * Sets number of iterations. Default is 0.
      *
      * @param numberOfIterations the number of iterations
@@ -250,19 +200,19 @@ public class ValidUserQueryDBAuthenticationHandler extends AbstractJdbcUsernameP
         this.numberOfIterations = numberOfIterations;
     }
 
-    public String getSql() {
-        return sql;
-    }
-
-    public void setSql(String sql) {
-        this.sql = sql;
-    }
-
     public String getAlgorithmName() {
         return algorithmName;
     }
 
     public void setAlgorithmName(String algorithmName) {
         this.algorithmName = algorithmName;
+    }
+
+    public UserAuthenticationDao getUserAuthenticationDao() {
+        return userAuthenticationDao;
+    }
+
+    public void setUserAuthenticationDao(UserAuthenticationDao userAuthenticationDao) {
+        this.userAuthenticationDao = userAuthenticationDao;
     }
 }

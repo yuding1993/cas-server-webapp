@@ -120,8 +120,8 @@
                     </c:if>
 
                     <a href="#"><button class="button" type="submit">立即登录</button></a>
-                    <li><a href="#" onclick="iclogin();return false;">/ IC卡登录</a></li>
-                    <a href="#" onclick="icRegister();return false;">IC卡注册</a>
+                    <%--<li><a href="#" onclick="iclogin();return false;">/ IC卡登录</a></li>--%>
+                    <%--<a href="#" onclick="icRegister();return false;">IC卡注册</a>--%>
                     <form:errors path="*" id="msg" cssClass="alert_tip" element="div" htmlEscape="false"/>
                     <input type="hidden" name="lt" value="${loginTicket}"/>
                     <input type="hidden" name="execution" value="${flowExecutionKey}"/>

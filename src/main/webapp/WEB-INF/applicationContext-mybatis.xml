@@ -33,5 +33,8 @@
         <property name="sqlSessionFactory" ref="sqlSessionFactory" />
     </bean>
 
+    <bean id="userAuthenticationDao" class="org.jasig.cas.dao.impl.UserAuthenticationDaoImpl">
+        <property name="sqlSessionFactory" ref="sqlSessionFactory" />
+    </bean>
 
 </beans>

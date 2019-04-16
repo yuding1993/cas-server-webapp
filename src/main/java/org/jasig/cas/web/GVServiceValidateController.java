@@ -140,8 +140,8 @@ public class GVServiceValidateController extends AbstractController {
                 	return generateErrorView("INVALID_CLIENT_ID", "INVALID_CLIENT_ID", new Object[]{ clientId});
                 }
             }else{
-//            	logger.error("-----------clientid[null]--------");
-//            	return generateErrorView("INVALID_CLIENT_ID", "INVALID_CLIENT_ID", new Object[]{ "clientid[null]"});
+            	logger.error("-----------clientid[null]--------");
+            	return generateErrorView("INVALID_CLIENT_ID", "INVALID_CLIENT_ID", new Object[]{ "clientid[null]"});
             }
         	
             final Credential serviceCredentials = getServiceCredentialsFromRequest(request);
