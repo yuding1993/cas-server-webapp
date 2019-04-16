@@ -1,0 +1,32 @@
+# cas-server-webapp
+CAS Server 4.0二次开发。添加登录错误三次及以上验证码校验、用户登录数据库认证、CAS Server REST等
+
+![Image text](https://raw.githubusercontent.com/yuding1993/cas-server-webapp/master/index.png)
+
+
+
+# overlays依赖
+使得cas服务端二次开发更加简洁明了，通过maven依赖配置cas-server-webapp来指定需要依赖的原始cas服务端版本
+你当然也可以根据自身情况调整cas服务端的版本，但是由于版本兼容性原因，可能某些地方在更高或者更低的版本无法适应现在的代码就需要自己手动调整
+
+# 数据库配置
+通过自己的数据库类型以及数据库表结构进行cas登录账号密码校验
+### 配置修改
+cas.properties文件下修改对应数据库驱动和连接方式
+### 使用自身定义的用户表
+根据自身数据库表结构修改org.jasig.cas.entity.UaUser实体类以及PERSON_MAPPER.xml下面id为getUPersonByUsername的xml配置，
+如果发现其它代码出错就把局部地区动态调整
+
+# 用户自定义属性
+通过将MultipleAttributeUserDao实例化到spring容器之中并注入GVPersonDAO属性用来给方法提供数据持久层操作入口，通过getPerson方法构造
+IPersonAttributes对象将其返回即可
+
+# 自定义Credential
+通过继承RememberMeUsernamePasswordCredential并可拓展用户登录的验证属性
+
+# 验证逻辑自定义
+声明ValidUserQueryDBAuthenticationHandler继承自AbstractUsernamePasswordAuthenticationHandler并重写
+authenticateUsernamePasswordInternal方法进行验证逻辑自定义的判断
+
+# 自定义验证controller
+spring容器实例化类GVServiceValidateController对没有casClientId的cas客户端进行过滤处理
